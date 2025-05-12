@@ -4,18 +4,30 @@ import getAuthUser from "@/lib/getAuthUser";
 import { ObjectId } from "mongodb";
 import Link from "next/link";
 
+// Tipo mínimo esperado para un post
+interface Post {
+  _id: ObjectId;
+  title: string;
+  userId: ObjectId;
+}
+
 export default async function Dashboard() {
   const user = await getAuthUser();
 
-  const postsCollection = await getCollection("posts");
+  // Verifica si hay usuario antes de continuar
+  if (!user || typeof user.userId !== "string") {
+    return <p>Error: usuario no autenticado.</p>;
+  }
+
+  const postsCollection = await getCollection<Post>("posts");
   const userPosts = await postsCollection
     ?.find({ userId: ObjectId.createFromHexString(user.userId) })
     .sort({ $natural: -1 })
     .toArray();
 
-  if (!userPosts) return <p>Failed to fetch data!</p>;
+  if (!userPosts) return <p>Error al obtener los datos.</p>;
 
-  if (userPosts.length === 0) return <p>You don't have any posts</p>;
+  if (userPosts.length === 0) return <p>No tienes publicaciones.</p>;
 
   return (
     <div>
@@ -23,10 +35,10 @@ export default async function Dashboard() {
       <table>
         <thead>
           <tr>
-            <th className="w-3/6">Title</th>
-            <th className="w-1/6 sr-only">View</th>
-            <th className="w-1/6 sr-only">Edit</th>
-            <th className="w-1/6 sr-only">Delete</th>
+            <th className="w-3/6">Título</th>
+            <th className="w-1/6 sr-only">Ver</th>
+            <th className="w-1/6 sr-only">Editar</th>
+            <th className="w-1/6 sr-only">Eliminar</th>
           </tr>
         </thead>
         <tbody>
@@ -34,10 +46,10 @@ export default async function Dashboard() {
             <tr key={post._id.toString()}>
               <td className="w-3/6">{post.title}</td>
               <td className="w-1/6 text-blue-500">
-                <Link href={`/posts/show/${post._id.toString()}`}>View</Link>
+                <Link href={`/posts/show/${post._id.toString()}`}>Ver</Link>
               </td>
               <td className="w-1/6 text-green-500">
-                <Link href={`/posts/edit/${post._id.toString()}`}>Edit</Link>
+                <Link href={`/posts/edit/${post._id.toString()}`}>Editar</Link>
               </td>
               <td className="w-1/6 text-red-500">
                 <form action={deletePost}>
@@ -46,7 +58,7 @@ export default async function Dashboard() {
                     name="postId"
                     defaultValue={post._id.toString()}
                   />
-                  <button type="submit">Delete</button>
+                  <button type="submit">Eliminar</button>
                 </form>
               </td>
             </tr>

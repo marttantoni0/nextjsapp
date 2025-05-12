@@ -1,7 +1,7 @@
 import { createPost } from "@/actions/posts";
 import BlogForm from "@/components/BlogForm";
 
-export default async function create() {
+export default async function Create() {
   return (
     <div className="container w-1/2">
       <h1 className="title">Create a new post</h1>

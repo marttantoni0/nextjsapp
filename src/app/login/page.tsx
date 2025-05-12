@@ -2,19 +2,28 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { login } from "@/actions/auth";
+
+// Estado que devuelve la acción del login
+interface ActionState {
+  email?: string;
+  errors?: {
+    email?: string;
+    password?: string;
+  };
+}
 
 export default function Login() {
-  const [state, action, isPending] = useActionState(login, undefined);
+  const [state, action, isPending] = useActionState<ActionState>(
+    Login,
+    undefined
+  );
 
   return (
     <div className="container w-1/2">
-      <h1 className="title">Login</h1>
-
       <form action={action} className="space-y-4">
         <div>
           <label htmlFor="email">Email</label>
-          <input type="text" name="email" defaultValue={state?.email} />
+          <input type="text" name="email" defaultValue={state?.email ?? ""} />
           {state?.errors?.email && (
             <p className="error">{state.errors.email}</p>
           )}

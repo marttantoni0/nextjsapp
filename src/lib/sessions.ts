@@ -5,7 +5,7 @@ import "server-only"
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
 
-export async function encrypt(payload) {
+export async function encrypt(payload:any) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -13,7 +13,7 @@ export async function encrypt(payload) {
     .sign(encodedKey);
 }
 
-export async function decrypt(session) {
+export async function decrypt(session:any) {
   try {
     const { payload } = await jwtVerify(session, encodedKey, {
       algorithms: ["HS256"],
@@ -24,7 +24,7 @@ export async function decrypt(session) {
   }
 }
 
-export async function createSession(userId) {
+export async function createSession(userId:any) {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const session = await encrypt({ userId, expiresAt });
   const cookieStore = await cookies();

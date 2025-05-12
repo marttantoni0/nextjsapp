@@ -4,8 +4,21 @@ import { useActionState } from "react";
 import { register } from "@/actions/auth";
 import Link from "next/link";
 
+// Definimos el tipo que devuelve el action `register`
+interface RegisterState {
+  email?: string;
+  errors?: {
+    email?: string;
+    password?: string[];
+    confirmPassword?: string;
+  };
+}
+
 export default function Register() {
-  const [state, action, isPending] = useActionState(register, undefined);
+  const [state, action, isPending] = useActionState<RegisterState>(
+    register,
+    undefined
+  );
 
   return (
     <div className="container w-1/2">
@@ -14,7 +27,7 @@ export default function Register() {
       <form action={action} className="space-y-4">
         <div>
           <label htmlFor="email">Email</label>
-          <input type="text" name="email" defaultValue={state?.email} />
+          <input type="text" name="email" defaultValue={state?.email ?? ""} />
           {state?.errors?.email && (
             <p className="error">{state.errors.email}</p>
           )}
@@ -23,11 +36,11 @@ export default function Register() {
         <div>
           <label htmlFor="password">Password</label>
           <input type="password" name="password" />
-          {state?.errors?.password && (
+          {state?.errors?.password && Array.isArray(state.errors.password) && (
             <div className="error">
               <p>Password must:</p>
               <ul className="list-disc list-inside ml-4">
-                {state.errors.password.map((err) => (
+                {state.errors.password.map((err: string) => (
                   <li key={err}>{err}</li>
                 ))}
               </ul>

@@ -9,7 +9,11 @@ const poppins = Poppins({
   weight: ["200", "400", "700"],
 });
 
-export default function RootLayout({ children }) {
+interface childrenProps {
+  children: React.ReactNode;
+}
+
+export default function RootLayout({ children }: childrenProps) {
   return (
     <html lang="en">
       <body className={`${poppins.variable} font-sans`}>
