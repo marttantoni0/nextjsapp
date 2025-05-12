@@ -1,23 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
-import { register } from "@/actions/auth";
+import {register } from "./actions";
 import Link from "next/link";
-
-// Definimos el tipo que devuelve el action `register`
-interface RegisterState {
-  email?: string;
-  errors?: {
-    email?: string;
-    password?: string[];
-    confirmPassword?: string;
-  };
-}
+import ActionState from "./actions"
 
 export default function Register() {
-  const [state, action, isPending] = useActionState<RegisterState>(
+  const [state, action, isPending] = useActionState<ActionState, FormData>(
     register,
-    undefined
+    {}
   );
 
   return (

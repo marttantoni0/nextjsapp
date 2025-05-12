@@ -1,7 +1,7 @@
 import { deletePost } from "@/actions/posts";
 import { getCollection } from "@/lib/db";
-import getAuthUser from "@/lib/getAuthUser";
 import { ObjectId } from "mongodb";
+import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 
 // Tipo mínimo esperado para un post
@@ -12,16 +12,19 @@ interface Post {
 }
 
 export default async function Dashboard() {
-  const user = await getAuthUser();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Verifica si hay usuario antes de continuar
-  if (!user || typeof user.userId !== "string") {
+  if (!user || typeof user.id !== "string") {
     return <p>Error: usuario no autenticado.</p>;
   }
 
   const postsCollection = await getCollection<Post>("posts");
   const userPosts = await postsCollection
-    ?.find({ userId: ObjectId.createFromHexString(user.userId) })
+    ?.find({ userId: ObjectId.createFromHexString(user.id) })
     .sort({ $natural: -1 })
     .toArray();
 

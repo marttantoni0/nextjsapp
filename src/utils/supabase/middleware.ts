@@ -27,6 +27,8 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
+  console.log("middleware auth")
+
   // Do not run code between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
@@ -37,15 +39,22 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+  const publicRoutes = [
+    '/',
+    '/login',
+    '/register'
+  ]
+
+  if (!user) {
+    // no user, redirect to sign-in page unless accessing a public route
+    const { pathname } = request.nextUrl;
+    const isPublicRoute = publicRoutes.includes(pathname);
+
+    if (!isPublicRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/sign-in';
+      return NextResponse.redirect(url);
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

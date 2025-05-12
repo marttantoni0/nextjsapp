@@ -2,25 +2,31 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // Import useRouter for redirection
+import { useEffect } from "react"; // Import useEffect for side effects
+import { login, type ActionState } from "./actions"; // Import ActionState type
 
-// Estado que devuelve la acción del login
-interface ActionState {
-  email?: string;
-  errors?: {
-    email?: string;
-    password?: string;
-  };
-}
+// Local ActionState definition removed
 
 export default function Login() {
-  const [state, action, isPending] = useActionState<ActionState>(
-    Login,
-    undefined
+  const router = useRouter();
+  const [state, action, isPending] = useActionState<ActionState, FormData>(
+    login, //action of the form on submission
+    {} // initial state of the form, you can fill it previous values on error.
   );
+
+  useEffect(() => {
+    if (state.success) {
+      router.push("/"); // Redirect to homepage on successful login
+    }
+  }, [state.success, router]);
 
   return (
     <div className="container w-1/2">
       <form action={action} className="space-y-4">
+        {state?.errors?.general && (
+          <p className="error mb-4">{state.errors.general}</p>
+        )}
         <div>
           <label htmlFor="email">Email</label>
           <input type="text" name="email" defaultValue={state?.email ?? ""} />
@@ -38,7 +44,7 @@ export default function Login() {
         </div>
 
         <div className="flex items-end gap-4">
-          <button disabled={isPending} className="btn-primary">
+          <button type="submit" disabled={isPending} className="btn-primary">
             {isPending ? "Loading..." : "Login"}
           </button>
 
